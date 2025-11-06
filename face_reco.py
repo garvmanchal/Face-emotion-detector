@@ -24,7 +24,7 @@ raj_encoding = face_recognition.face_encodings(raj_image)[0]
 
 
 
-sanjay_image = face_recognition.load_image_file("sanjay1.jpeg")
+sanjay_image = face_recognition.load_image_file("sanjay.jpeg")
 sanjay_encoding = face_recognition.face_encodings(sanjay_image)[0]
 
 sudhanshu_image = face_recognition.load_image_file("sudhanshu1.jpeg")
