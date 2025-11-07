@@ -14,12 +14,14 @@ video_capture = cv2.VideoCapture(0)  # For laptop camera
 
 # ======= Load Known Faces =======
 people = {
-    "Garv": "grv1.jpeg",
-    "Aashi": "aashi1.jpeg",
-    "Raj": "raj1.jpeg",
+
+    "Garv": "grv.jpeg",
+    "Aashi": "aashi.jpeg",
+    "Raj": "raj.jpeg",
     "Sanjay": "sanjay.jpeg",
-    "Sudhanshu": "sudhanshu1.jpeg",
-    "Sahil": "sahil1.jpeg"
+    "Sudhanshu": "sudhanshu.jpeg",
+    "Sahil": "sahil.jpeg"
+
 }
 
 known_face_encodings = []
@@ -155,3 +157,4 @@ while True:
 video_capture.release()
 cv2.destroyAllWindows()
 f.close()
+
