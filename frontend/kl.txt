@@ -1,0 +1,130 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import face_recognition
+import cv2
+import numpy as np
+from deepface import DeepFace
+from datetime import datetime
+import csv
+import os
+
+app = FastAPI()
+
+
+# CORS for frontend
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Load Emotion Model
+
+print("⚙️ Loading emotion model...")
+emotion_model = DeepFace.build_model("Emotion")
+print("✅ Emotion model loaded successfully!")
+
+
+# Load Known Faces
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+people = {
+    "Garv": "grv.jpeg",
+    "Aashi": "aashi.jpeg",
+    "Raj": "raj.jpeg",
+    "Sanjay": "sanjay.jpeg",
+    "Sudhanshu": "sudhanshu.jpeg",
+    "Sahil": "sahil.jpeg",
+}
+
+known_face_encodings = []
+known_face_names = []
+
+for name, file in people.items():
+    try:
+        path = os.path.join(BASE_DIR, file)
+        img = face_recognition.load_image_file(path)
+        encoding = face_recognition.face_encodings(img)[0]
+        known_face_encodings.append(encoding)
+        known_face_names.append(name)
+        print(f"✅ Loaded {name}'s face.")
+    except Exception as e:
+        print(f"⚠️ Could not load {name}: {e}")
+
+
+# CSV Setup
+
+csv_filename = f"attendance_{datetime.now().strftime('%Y-%m-%d')}.csv"
+if not os.path.exists(csv_filename):
+    with open(csv_filename, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Name", "Emotion", "Time"])
+
+
+# Emotion Detection Function
+
+def detect_emotion(face_img):
+    try:
+        result = DeepFace.analyze(
+            face_img,
+            actions=["emotion"],
+            enforce_detection=False,
+            models={"emotion": emotion_model},
+        )
+        emotion = result[0]["dominant_emotion"].lower()
+        if emotion not in ["happy", "sad", "neutral"]:
+            emotion = "neutral"
+        return emotion
+    except:
+        return "neutral"
+
+# ---------------------------------------------------
+# ROUTES
+# ---------------------------------------------------
+@app.get("/")
+def home():
+    return {"message": "Backend working fine ✅"}
+
+@app.get("/recognize")
+def recognize():
+    # Open camera
+    video_capture = cv2.VideoCapture(0)
+    if not video_capture.isOpened():
+        return {"user": "Camera Error", "emotion": "N/A"}
+
+    ret, frame = video_capture.read()
+    video_capture.release()
+
+    if not ret:
+        return {"user": "Frame Error", "emotion": "N/A"}
+
+    # Detect faces
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(rgb_frame)
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+    if not face_encodings:
+        return {"user": "No face detected", "emotion": "N/A"}
+
+    for face_encoding in face_encodings:
+        name = "Unknown"
+        if known_face_encodings:
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            face_distance = face_recognition.face_distance(known_face_encodings, face_encoding)
+            best_match_index = np.argmin(face_distance)
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
+
+        # Detect emotion
+        emotion = detect_emotion(frame)
+
+        # Save to CSV
+        with open(csv_filename, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([name, emotion, datetime.now().strftime("%H:%M:%S")])
+
+        return {"user": name, "emotion": emotion}
