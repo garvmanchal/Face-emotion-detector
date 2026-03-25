@@ -1,0 +1,4 @@
+*.jpeg
+node_modules/
+__pycache__/
+.idea/
