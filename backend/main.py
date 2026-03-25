@@ -20,23 +20,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+    
 # Load Emotion Model
-print("⚙️ Loading emotion model...")
+print(" Loading emotion model...")
 emotion_model = DeepFace.build_model("Emotion")
-print("✅ Emotion model loaded successfully!")
+print("Emotion model loaded successfully!")
 
 
 # Load Known Faces
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 people = {
-    "Garv": "grv.jpeg",
+    "Garv": "grv3232.jpeg",
     "Aashi": "aashi.jpeg",
     "Raj": "raj.jpeg",
-    "Sanjay": "sanjay.jpeg",
-    "Sudhanshu": "sudhanshu.jpeg",
-    "Sahil": "sahil.jpeg",
 }
+
 
 known_face_encodings = []
 known_face_names = []
@@ -48,9 +46,9 @@ for name, file in people.items():
         encoding = face_recognition.face_encodings(img)[0]
         known_face_encodings.append(encoding)
         known_face_names.append(name)
-        print(f"✅ Loaded {name}'s face.")
+        print(f"Loaded {name}'s face.")
     except Exception as e:
-        print(f"⚠️ Could not load {name}: {e}")
+        print(f"Could not load {name}: {e}")
 
 
 # CSV Setup
@@ -61,7 +59,7 @@ if not os.path.exists(csv_filename):
         writer.writerow(["Name", "Emotion", "Confidence", "Time"])
 
 
-# ✨ IMPROVED EMOTION DETECTION FUNCTION ✨
+#  IMPROVED EMOTION DETECTION FUNCTION 
 def detect_emotion(face_img, face_location=None):
     """
     Improved emotion detection that properly detects happy, sad, neutral
@@ -94,8 +92,8 @@ def detect_emotion(face_img, face_location=None):
         emotions = result["emotion"]
         dominant_emotion = result["dominant_emotion"]
         
-        print(f"🎭 All emotions detected: {emotions}")
-        print(f"🎯 Dominant emotion: {dominant_emotion}")
+        print(f" All emotions detected: {emotions}")
+        print(f" Dominant emotion: {dominant_emotion}")
         
         # Only focus on 3 emotions: happy, sad, neutral
         happy_score = emotions.get("happy", 0)
@@ -112,12 +110,12 @@ def detect_emotion(face_img, face_location=None):
         final_emotion = max(target_emotions, key=target_emotions.get)
         final_confidence = target_emotions[final_emotion]
         
-        print(f"✅ Final emotion: {final_emotion} ({final_confidence:.2f}%)")
+        print(f"Final emotion: {final_emotion} ({final_confidence:.2f}%)")
         
         return final_emotion, final_confidence
         
     except Exception as e:
-        print(f"⚠️ Emotion detection error: {e}")
+        print(f" Emotion detection error: {e}")
         return "neutral", 0.0
 
 
@@ -126,7 +124,7 @@ def detect_emotion(face_img, face_location=None):
 # ---------------------------------------------------
 @app.get("/")
 def home():
-    return {"message": "Backend working fine ✅"}
+    return {"message": "Backend working fine "}
 
 
 @app.get("/recognize")
@@ -209,5 +207,5 @@ def test_emotion():
     return {
         "emotion": emotion,
         "confidence": f"{confidence:.2f}%",
-        "status": "Emotion detection working! ✅"
+        "status": "Emotion detection working! "
     }
