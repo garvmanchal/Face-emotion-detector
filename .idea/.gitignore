@@ -6,3 +6,11 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# ENV / secrets
+.env
+raj.jpeg
+grv.jpeg
+aashi.jpeg
+sahil.jpeg
+sanjay.jpeg
+sudhanshu.jpeg
